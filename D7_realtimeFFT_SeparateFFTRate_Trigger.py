@@ -114,8 +114,8 @@ class DataInlet(Inlet):
         filtfft_y=np.fft.fft(filtered_thisY)
         filtfft_y=np.abs(filtfft_y)/(N)
         self.filtfftcurves[ch].setData(new_fftX,filtfft_y)
-        if (filtered_thisY[[0]]>triggerVal):
-            print(str(filtered_thisY[0])+" More than "+str(triggerVal))
+        if (filtered_thisY[[xlength-1]]>triggerVal):
+            print(str(filtered_thisY[xlength-1])+" More than "+str(triggerVal))
 
 def set_buffer(info,dtypes):
     bufsize = (2 * math.ceil(info.nominal_srate() * plot_duration), info.channel_count())

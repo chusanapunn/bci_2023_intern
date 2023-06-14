@@ -1,9 +1,8 @@
 __author__ = 'Kujira'
 import socket               # Import socket module
-from pyqtgraph.Qt import QtCore
 
 s_server = socket.socket()         # Create a socket object
-host="Kujira"              # Bind with everyone
+host="127.0.0.1"              # Bind Local
 port = 13254                # Reserve a port for your service.
 s_server.bind((host, port))        # Bind to the port
 

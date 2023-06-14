@@ -1,12 +1,9 @@
 import socket               # Import socket module
-from pyqtgraph.Qt import QtCore
-import time
 
 s_server = socket.socket()         # Create a socket object
-host = socket.gethostname() # Get local machine name
+host = "127.0.0.1"              # Bind Local
 port = 13254                # Reserve a port for your service.
 connected=False
-
 
 try:
     print ('Try Connecting to ', host, port)

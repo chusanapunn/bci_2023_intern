@@ -2,7 +2,7 @@ import socket               # Import socket module
 
 s_server = socket.socket()         # Create a socket object
 host = "127.0.0.1"              # Bind Local
-port = 13254                # Reserve a port for your service.
+port = 9030                # Reserve a port for your service.
 connected=False
 
 try:

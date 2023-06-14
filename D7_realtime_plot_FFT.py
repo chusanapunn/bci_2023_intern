@@ -84,8 +84,8 @@ class DataInlet(Inlet):
             # new_fftX=new_fftX.flatten()
             # new_fftY=new_fftY.flatten()
 
-            print("Normal debug :"+str(this_x.shape)+"Y:"+str(this_y.shape))
-            print("fft debug :"+str(new_fftX.shape)+"FFTY"+str(new_fftY.shape))
+            # print("Normal debug :"+str(this_x.shape)+"Y:"+str(this_y.shape))
+            # print("fft debug :"+str(new_fftX.shape)+"FFTY"+str(new_fftY.shape))
             self.fftcurves[ch].setData(new_fftX,new_fftY)
 
 def set_buffer(info,dtypes):

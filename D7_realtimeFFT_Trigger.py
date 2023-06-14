@@ -10,7 +10,7 @@ import scipy.signal as sig
 plot_duration = 5  # how many seconds of data to show
 update_interval = 12  # ms between screen updates
 pull_interval = 60 # ms between each pull operation
-fft_interval = 125 # ms between each FFT calculation
+fft_interval = 500 # ms between each FFT calculation
 
 
 class Inlet:
@@ -25,8 +25,9 @@ class Inlet:
         fs = info.nominal_srate()
         nyq=1/2*fs   
         
-
     def pull_and_plot(self, plot_time: float, plt: pg.PlotItem):
+        pass
+    def plot_fft(self,ch):
         pass
 
 class DataInlet(Inlet):  
@@ -42,11 +43,15 @@ class DataInlet(Inlet):
         self.curves = [pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
         self.fftcurves= [pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
         self.filtcurves= [pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
-        self.filtfftcurves=[pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True)]
+        self.filtfftcurves=[pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
+        
+        # Set Triggervalue and TriggerLine
         global triggerVal
-        triggerVal=1.5
+        triggerVal=1.3
+        global triggerLine
         triggerLine=pg.InfiniteLine(label="SimpleTriggerLine",pos=triggerVal,movable=True,angle=0)
-        triggerLine.setValue(triggerVal)
+        
+
         for curve in self.curves:
             plt.addItem(curve)
             # plt.addItem(triggerLine)
@@ -57,7 +62,12 @@ class DataInlet(Inlet):
             filtplt.addItem(triggerLine)
         for filtfftcurve in self.filtfftcurves:
             filtfftplt.addItem(filtfftcurve)
-            
+
+    # def update_trigLine(triggerVal):
+    #     print("update TriggerLine"+str(triggerLine.value())) 
+    #     triggerVal=triggerLine.value
+    #     self.triggerLine.setValue(triggerVal)
+    #     return triggerVal
 
     def pull_and_plot(self, plot_time, ch):
         global _,ts,this_x,this_y
@@ -65,7 +75,6 @@ class DataInlet(Inlet):
                                       max_samples=self.buffer.shape[0],
                                       dest_obj=self.buffer)
         # ts will be empty if no samples were pulled, a list of timestamps otherwise
-        
         
         if ts:
             ts = np.asarray(ts)
@@ -90,6 +99,7 @@ class DataInlet(Inlet):
     def plot_fft(self,ch):
         # plot fft
         global filtered_thisY
+
         xlength=len(this_x)
 
         frequencies=np.fft.fftfreq(xlength,d=1/fs)
@@ -103,10 +113,10 @@ class DataInlet(Inlet):
         self.fftcurves[ch].setData(new_fftX,new_fftY)
 
         # Filter and plot signal
-        if (ch==1):
+        if (ch==0):     # channel 1 filter
             filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
-        elif (ch==0):
-            filtered_thisY=butter_bandstop_filter(this_y,fs,4,7,13)
+        elif (ch==1):   # channel 2 filter
+            filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
         # filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
         self.filtcurves[ch].setData(this_x,filtered_thisY)
 
@@ -114,8 +124,14 @@ class DataInlet(Inlet):
         filtfft_y=np.fft.fft(filtered_thisY)
         filtfft_y=np.abs(filtfft_y)/(N)
         self.filtfftcurves[ch].setData(new_fftX,filtfft_y)
+        global command
+        # triggerVal=self.update_trigLine()
         if (filtered_thisY[[xlength-1]]>triggerVal):
-            print(str(filtered_thisY[xlength-1])+" More than "+str(triggerVal))
+            command="W"
+            print("Channel: "+ str(ch+1) +" [{:2.3f}] :".format(filtered_thisY[xlength-1])\
+                  +"{:1.3f}".format(filtered_thisY[xlength-1]-triggerVal)\
+                      + " More than "+str(triggerVal)+command)
+        
 
 def set_buffer(info,dtypes):
     bufsize = (2 * math.ceil(info.nominal_srate() * plot_duration), info.channel_count())
@@ -185,14 +201,21 @@ def main():
         for pltnumber in range(channel_count):
             mch[pltnumber].setXRange(plot_time - plot_duration + fudge_factor, plot_time - fudge_factor)
             filtch[pltnumber].setXRange(plot_time - plot_duration + fudge_factor, plot_time - fudge_factor)
+    
     def update():
         mintime = pylsl.local_clock() - plot_duration
         for ch,inlet in enumerate(inlets):
             inlet.pull_and_plot(mintime, ch)
+
+            # if triggerLine.mouseClickEvent:
+            #     inlet.update_trigLine(triggerVal)
+
     def update_fft():
         for ch,inlet in enumerate(inlets):
             inlet.plot_fft(ch)
         print("-----------FFT Update-----------")
+
+    
         
     
     # create a timer that will move the view every update_interval ms
@@ -213,6 +236,9 @@ def main():
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         app = QtWidgets.QApplication(sys.argv) 
         app.exec()
+
+    
+
 
 if __name__ == '__main__':
     main()

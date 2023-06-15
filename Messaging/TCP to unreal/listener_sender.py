@@ -26,8 +26,8 @@ except s_sender.error :
 
 while connected:
     try:
-        time.sleep(2)
+        time.sleep(1)
         sendMessage(command,conn)
     except ConnectionAbortedError:
-        print("Connection Doom due to something wa")
+        print("Connection Doom` due to something wa")
         connected = False

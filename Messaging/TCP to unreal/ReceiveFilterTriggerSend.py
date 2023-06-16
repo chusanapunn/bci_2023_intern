@@ -18,26 +18,26 @@ update_interval = 12  # ms between screen updates
 pull_interval = 60 # ms between each pull operation
 fft_interval = 500 # ms between each FFT calculation
 
-# Socket
-s_sender = socket.socket()         # Create a socket object
-host = "127.0.0.1"              # Bind Local
-port = 9030                # Reserve a port for your service.
-connected=False
-s_sender.bind((host,port))
+# Socket NETWORK
+# s_sender = socket.socket()         # Create a socket object
+# host = "127.0.0.1"              # Bind Local
+# port = 9030                # Reserve a port for your service.
+# connected=False
+# s_sender.bind((host,port))
 
-# Listen to incoming connection
-s_sender.listen(5)
+# # Listen to incoming connection
+# s_sender.listen(5)
 
-# Connecting Prompt
-try:
-    conn, addr =s_sender.accept()
-    print ('Open Listening Server', host, port)
-    connected=True
-     # Establish connection with client.
-    print('Got connection from', addr)
-except s_sender.error :
-    connected=False
-    print("Connection DOOM, did you open the Client Yet?")
+# # Connecting Prompt
+# try:
+#     conn, addr =s_sender.accept()
+#     print ('Open Listening Server', host, port)
+#     connected=True
+#      # Establish connection with client.
+#     print('Got connection from', addr)
+# except s_sender.error :
+#     connected=False
+#     print("Connection DOOM, did you open the Client Yet?")
 
 class Inlet:
     def __init__(self,info:pylsl.StreamInfo):
@@ -72,10 +72,10 @@ class DataInlet(Inlet):
         self.filtfftcurves=[pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
         
         # Set Triggervalue and TriggerLine
-        global triggerValA,triggerValB
-        triggerValA=1.3
-        triggerValB=0.5
-        global triggerLine
+        # global triggerValA,triggerValB
+        # triggerValA=1.3
+        # triggerValB=0.5
+        # global triggerLine
         # triggerLine=pg.InfiniteLine(label="SimpleTriggerLine",pos=triggerValA,movable=True,angle=0)
         
 
@@ -141,9 +141,10 @@ class DataInlet(Inlet):
 
         # Filter and plot signal
         if (ch==0):     # channel 1 filter
-            filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
-        elif (ch==1):   # channel 2 filter
-            filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
+            filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
+            # filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
+        # elif (ch==1):   # channel 2 filter
+            # filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
         # filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
         self.filtcurves[ch].setData(this_x,filtered_thisY)
 
@@ -151,31 +152,31 @@ class DataInlet(Inlet):
         filtfft_y=np.fft.fft(filtered_thisY)
         filtfft_y=np.abs(filtfft_y)/(N)
         self.filtfftcurves[ch].setData(new_fftX,filtfft_y)
-        global command
+        # global command
         # triggerVal=self.update_trigLine()
-        if (filtered_thisY[[xlength-1]]>triggerValA):
-            command="A"
-            print("Channel: "+ str(ch+1) +" [{:2.3f}] :".format(filtered_thisY[xlength-1])\
-                  +"{:1.3f}".format(filtered_thisY[xlength-1]-triggerValA)\
-                      + " More than "+str(triggerValA)+": Command = "+command)
+        # if (filtered_thisY[[xlength-1]]>triggerValA):
+        #     command="A"
+        #     print("Channel: "+ str(ch+1) +" [{:2.3f}] :".format(filtered_thisY[xlength-1])\
+        #           +"{:1.3f}".format(filtered_thisY[xlength-1]-triggerValA)\
+        #               + " More than "+str(triggerValA)+": Command = "+command)
             
-        elif (filtered_thisY[[xlength-1]]<triggerValB):
-            command="S"
-            print("Channel: "+ str(ch+1) +" [{:2.3f}] :".format(filtered_thisY[xlength-1])\
-                    +"{:1.3f}".format(filtered_thisY[xlength-1]-triggerValB)\
-                        + " More than "+str(triggerValB)+": Command = "+command)
+        # elif (filtered_thisY[[xlength-1]]<triggerValB):
+        #     command="S"
+        #     print("Channel: "+ str(ch+1) +" [{:2.3f}] :".format(filtered_thisY[xlength-1])\
+        #             +"{:1.3f}".format(filtered_thisY[xlength-1]-triggerValB)\
+        #                 + " More than "+str(triggerValB)+": Command = "+command)
             
-    def sendCommand(cmd,c):
-        c.send(cmd.encode())
-        print("--Sent message--")
+    # def sendCommand(cmd,c):
+    #     c.send(cmd.encode())
+    #     print("--Sent message--")
         
-    while connected:
-        try:
-            time.sleep(1)
-            sendCommand(command,conn)
-        except ConnectionAbortedError:
-            print("Connection Doom` due to something wa")
-            connected = False
+    # while connected:
+    #     try:
+    #         time.sleep(1)
+    #         sendCommand(command,conn)
+    #     except ConnectionAbortedError:
+    #         print("Connection Doom` due to something wa")
+    #         connected = False
 
 def set_buffer(info,dtypes):
     bufsize = (2 * math.ceil(info.nominal_srate() * plot_duration), info.channel_count())
@@ -183,15 +184,15 @@ def set_buffer(info,dtypes):
     empty = np.array([])
     return bufsize,buffer,empty
 
-def butter_bandstop_filter(data, fs, order, a,b):
+def butter_bandstop_filter(data, fs, order, a, b):
         # Get the filter coefficients  
         b, a = sig.butter(order, [a,b], 'bandstop', fs=fs, output='ba')
         y = sig.filtfilt(b, a, data)
         return y
 
-def butter_lowpass_filter(data, cutOff,fs, order):
+def butter_lowpass_filter(data, cutOff, fs, order):
         # Get the filter coefficients 
-        b_lp, a_lp = sig.butter_lowpass(order, cutOff, 'bandstop', fs=fs, output='ba')
+        b_lp, a_lp = sig.butter(order, cutOff, 'lowpass', fs=fs, output='ba')
         y = sig.filtfilt(b_lp, a_lp, data)
         return y
 

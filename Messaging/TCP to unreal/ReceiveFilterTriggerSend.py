@@ -61,9 +61,9 @@ class DataInlet(Inlet):
         dtypes = [[], np.float32, np.float64, None, np.int32, np.int16, np.int8, np.int64]
         super().__init__(info)
 
-        self.bufsize,self.buffer,empty=set_buffer(info,dtypes)
+        self.bufsize,self.buffer,empty,self.bufferEmpty,self.fftbufsize,self.fftbuffer=set_buffer(info,dtypes)
         global N
-        N=int(self.bufsize[0]/fs)
+        
         
         # signal Curves
         self.curves = [pg.PlotCurveItem(x=empty, y=empty , autoDownsample=True) for _ in range(self.channel_count)]
@@ -102,7 +102,7 @@ class DataInlet(Inlet):
                                       max_samples=self.buffer.shape[0],
                                       dest_obj=self.buffer)
         # ts will be empty if no samples were pulled, a list of timestamps otherwise
-        
+        N=int(self.bufsize[0]/fs)
         if ts:
             ts = np.asarray(ts)
             y = self.buffer[0:ts.size, :]
@@ -120,20 +120,34 @@ class DataInlet(Inlet):
             # Debug
             # print("X:"+str(this_x),end="")
             # print("Y:"+str(this_y))
+    
             
+    def plot_fft(self,ch,fftmintime):
+        global  fft_,fft_ts,fft_this_x,fft_this_y
+        fft_, fft_ts = self.inlet.pull_chunk(timeout=0.0,
+                                      max_samples=self.fftbuffer.shape[0],
+                                      dest_obj=self.fftbuffer)
+        fft_N=int(self.fftbufsize[0]/fs)
+        if fft_ts:
+            fft_ts = np.asarray(fft_ts)
+            fft_y = self.buffer[0:fft_ts.size, :]
+            fft_this_x = None
+            fft_old_offset = 0
+            fft_new_offset = 0
+            fft_old_x, fft_old_y = self.curves[ch].getData()
 
-            
-    def plot_fft(self,ch):
+            fft_old_offset = fft_old_x.searchsorted(fftmintime)
+            fft_new_offset = fft_ts.searchsorted(fftmintime)
+            fft_this_x = np.hstack((fft_old_x[fft_old_offset:], fft_ts[fft_new_offset:]))
+            fft_this_y = np.hstack((fft_old_y[fft_old_offset:], fft_y[fft_new_offset:, ch] - ch))
         # plot fft
-        global filtered_thisY
-
-        xlength=len(this_x)
-
-        frequencies=np.fft.fftfreq(xlength,d=1/fs)
-        new_fftX=frequencies[:xlength]
+        # global this_y,filtered_thisY
+        fft_xlength=len(fft_this_x)
+        frequencies=np.fft.fftfreq(fft_xlength,d=1/fs)
+        new_fftX=frequencies[:fft_xlength]
         new_fftX=abs(new_fftX)
-        new_fftY=np.fft.fft(this_y)
-        new_fftY=np.abs(new_fftY)/(N)
+        new_fftY=np.fft.fft(fft_this_y)
+        new_fftY=np.abs(new_fftY)/(fft_N)
         # new_fftX=new_fftX.flatten()
         # new_fftY=new_fftY.flatten()
 
@@ -141,16 +155,21 @@ class DataInlet(Inlet):
 
         # Filter and plot signal
         if (ch==0):     # channel 1 filter
-            filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
-            # filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
+            # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
+            filtered_thisY=butter_bandstop_filter(fft_this_y,fs,4,7,13)
+            # filtered_thisY=butter_lowpass_filter(fft_this_y,30,fs,4)
         # elif (ch==1):   # channel 2 filter
             # filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
-        # filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
-        self.filtcurves[ch].setData(this_x,filtered_thisY)
+            
+        if (ch==1):     # channel 1 filter
+            filtered_thisY=butter_bandstop_filter(fft_this_y,fs,4,17,23)
+            # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
+        self.filtcurves[ch].setData(fft_this_x,filtered_thisY)
+        
 
         # fft of filtered signal
         filtfft_y=np.fft.fft(filtered_thisY)
-        filtfft_y=np.abs(filtfft_y)/(N)
+        filtfft_y=np.abs(filtfft_y)/(fft_N)
         self.filtfftcurves[ch].setData(new_fftX,filtfft_y)
         # global command
         # triggerVal=self.update_trigLine()
@@ -182,7 +201,10 @@ def set_buffer(info,dtypes):
     bufsize = (2 * math.ceil(info.nominal_srate() * plot_duration), info.channel_count())
     buffer = np.empty(bufsize, dtype=dtypes[info.channel_format()])
     empty = np.array([])
-    return bufsize,buffer,empty
+    bufferEmpty=np.array([])
+    fftbufsize=(2 * math.ceil(info.nominal_srate() * plot_duration), info.channel_count())
+    fftbuffer=np.empty(fftbufsize,dtype=dtypes[info.channel_format()])
+    return bufsize,buffer,empty,bufferEmpty,fftbufsize,fftbuffer
 
 def butter_bandstop_filter(data, fs, order, a, b):
         # Get the filter coefficients  
@@ -216,7 +238,7 @@ def main():
         filtfftch=[None]*channel_count # filt FFT channel handler
 
     # override channelcount
-    channel_count=1
+    channel_count=2
 
     for ch in range(channel_count):
         # main channel
@@ -256,8 +278,9 @@ def main():
             #     inlet.update_trigLine(triggerVal)
 
     def update_fft():
+        fftmintime = pylsl.local_clock() - plot_duration
         for ch,inlet in enumerate(inlets):
-            inlet.plot_fft(ch)
+            inlet.plot_fft(ch,fftmintime)
         print("-----------FFT Update-----------")
 
     

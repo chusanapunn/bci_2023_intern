@@ -6,7 +6,7 @@ import time
 import numpy as np
 from pylsl import StreamInfo, StreamOutlet
 
-info = StreamInfo('BioSemi', 'EEG', 8, 250, 'float32', 'myuid34234')
+info = StreamInfo('Random', 'EEG', 8, 250, 'float32', 'myuid34234')
 
 # next make an outlet
 outlet = StreamOutlet(info)

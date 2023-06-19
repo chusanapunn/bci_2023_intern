@@ -161,13 +161,17 @@ class DataInlet(Inlet):
             # filtered_thisY=butter_bandstop_filter(this_y,fs,4,28,34)
             # filtered_thisY=butter_lowpass_filter(this_y,30,fs,4)
             filtered_data=butter_bandstop_filter(data,fs,4,8,12)
+
         elif (ch==1):     # channel 1 filter
             filtered_data=butter_bandstop_filter(data,fs,4,19,23)
+
             # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
         elif (ch==2):     # channel 1 filter
             filtered_data=butter_bandstop_filter(data,fs,4,28,34)
+
         else:
             filtered_data=data
+
         filtered_fft_result = np.fft.fft(filtered_data)
         filtered_fft_result=np.abs(filtered_fft_result)
         self.filtfftcurves[ch].setData(freq, filtered_fft_result)

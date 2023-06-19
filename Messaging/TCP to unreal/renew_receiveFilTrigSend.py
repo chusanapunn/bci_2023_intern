@@ -128,9 +128,11 @@ class DataInlet(Inlet):
 
             elif (ch==2):     # channel 1 filter
                 filtered_thisY=butter_bandstop_filter(this_y,fs,4,28,34)
-
-            self.curves[ch].setData(this_x, this_y)
-            self.filtcurves[ch].setData(this_x,filtered_thisY)
+            try:
+                self.curves[ch].setData(this_x, this_y)
+                self.filtcurves[ch].setData(this_x,filtered_thisY)
+            except:
+                print("buffering") 
         #     fft_N=int(self.fftbufsize[0]/fs)
         # #     # plot fft
         # #     # global this_y,filtered_thisY
@@ -154,7 +156,7 @@ class DataInlet(Inlet):
         fft_result=np.abs(fft_result)
         freq=np.fft.fftfreq(data.size,d=1/fs)
         freq=np.abs(freq)
-        self.fftcurves[ch].setData(freq,fft_result)
+        
 
         if (ch==0):     # channel 1 filter
             # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
@@ -174,8 +176,11 @@ class DataInlet(Inlet):
 
         filtered_fft_result = np.fft.fft(filtered_data)
         filtered_fft_result=np.abs(filtered_fft_result)
-        self.filtfftcurves[ch].setData(freq, filtered_fft_result)
-        
+        try:
+            self.fftcurves[ch].setData(freq,fft_result)
+            self.filtfftcurves[ch].setData(freq, filtered_fft_result)
+        except:
+            print("buffering") 
     #     # global command
     #     # triggerVal=self.update_trigLine()
         # if (filtered_thisY[[xlength-1]]>triggerValA):

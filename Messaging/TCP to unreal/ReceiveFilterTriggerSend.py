@@ -96,13 +96,12 @@ class DataInlet(Inlet):
     #     self.triggerLine.setValue(triggerVal)
     #     return triggerVal
 
-    def pull_and_plot(self, plot_time, ch):
-        global _,ts,this_x,this_y
+    def pull_and_filter(self, plot_time, ch):
+        global _,ts,this_x,this_y,filtered_thisY,this_fftX,this_fftY
         _, ts = self.inlet.pull_chunk(timeout=0.0,
                                       max_samples=self.buffer.shape[0],
                                       dest_obj=self.buffer)
         # ts will be empty if no samples were pulled, a list of timestamps otherwise
-        N=int(self.bufsize[0]/fs)
         if ts:
             ts = np.asarray(ts)
             y = self.buffer[0:ts.size, :]
@@ -115,62 +114,65 @@ class DataInlet(Inlet):
             new_offset = ts.searchsorted(plot_time)
             this_x = np.hstack((old_x[old_offset:], ts[new_offset:]))
             this_y = np.hstack((old_y[old_offset:], y[new_offset:, ch] - ch))
+        
+        # FFT Buffer
 
-            self.curves[ch].setData(this_x, this_y)
-            # Debug
-            # print("X:"+str(this_x),end="")
-            # print("Y:"+str(this_y))
-    
-            
-    def plot_fft(self,ch,fftmintime):
-        global  fft_,fft_ts,fft_this_x,fft_this_y
-        fft_, fft_ts = self.inlet.pull_chunk(timeout=0.0,
-                                      max_samples=self.fftbuffer.shape[0],
-                                      dest_obj=self.fftbuffer)
-        fft_N=int(self.fftbufsize[0]/fs)
-        if fft_ts:
-            fft_ts = np.asarray(fft_ts)
-            fft_y = self.buffer[0:fft_ts.size, :]
-            fft_this_x = None
+            fft_ts = np.asarray(ts)
+            fft_y = self.fftbuffer[0:fft_ts.size, :]
+            this_fftX = None
             fft_old_offset = 0
             fft_new_offset = 0
             fft_old_x, fft_old_y = self.curves[ch].getData()
 
-            fft_old_offset = fft_old_x.searchsorted(fftmintime)
-            fft_new_offset = fft_ts.searchsorted(fftmintime)
-            fft_this_x = np.hstack((fft_old_x[fft_old_offset:], fft_ts[fft_new_offset:]))
-            fft_this_y = np.hstack((fft_old_y[fft_old_offset:], fft_y[fft_new_offset:, ch] - ch))
+            fft_old_offset = fft_old_x.searchsorted(plot_time)
+            fft_new_offset = fft_ts.searchsorted(plot_time)
+            this_fftX = np.hstack((fft_old_x[fft_old_offset:], fft_ts[fft_new_offset:]))
+            this_fftY = np.hstack((fft_old_y[fft_old_offset:], fft_y[fft_new_offset:, ch] - ch))
+            # Debug
+            # print("X:"+str(this_x),end="")
+            # print("Y:"+str(this_y))
+             # Filter and plot signal
+            if (ch==0):     # channel 1 filter
+                # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
+                filtered_thisY=butter_bandstop_filter(this_y,fs,4,7,13)
+                # filtered_thisY=butter_lowpass_filter(fft_this_y,30,fs,4)
+            # elif (ch==1):   # channel 2 filter
+                # filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
+                
+            if (ch==1):     # channel 1 filter
+                filtered_thisY=butter_bandstop_filter(this_y,fs,4,17,23)
+                # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
+        
+    def plot(self,ch):
+        global  _,ts,this_x,this_y,filtered_thisY
+        # fft_, fft_ts = self.inlet.pull_chunk(timeout=0.0,
+        #                               max_samples=self.fftbuffer.shape[0],
+        #                               dest_obj=self.fftbuffer)
+        # plot Raw Curves, Filtered Curves
+        self.curves[ch].setData(this_x, this_y)
+        self.filtcurves[ch].setData(this_x,filtered_thisY)
+
+    def plot_fft(self,ch):
+        global  _,ts,this_fftX,this_fftY,filtered_thisY
+        # fft_, fft_ts = self.inlet.pull_chunk(timeout=0.0,
+        #                               max_samples=self.fftbuffer.shape[0],
+        #                               dest_obj=self.fftbuffer)
+        fft_N=int(self.fftbufsize[0]/fs)
         # plot fft
         # global this_y,filtered_thisY
-        fft_xlength=len(fft_this_x)
+        fft_xlength=len(this_fftX)
         frequencies=np.fft.fftfreq(fft_xlength,d=1/fs)
-        new_fftX=frequencies[:fft_xlength]
-        new_fftX=abs(new_fftX)
-        new_fftY=np.fft.fft(fft_this_y)
-        new_fftY=np.abs(new_fftY)/(fft_N)
-        # new_fftX=new_fftX.flatten()
-        # new_fftY=new_fftY.flatten()
-
-        self.fftcurves[ch].setData(new_fftX,new_fftY)
-
-        # Filter and plot signal
-        if (ch==0):     # channel 1 filter
-            # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
-            filtered_thisY=butter_bandstop_filter(fft_this_y,fs,4,7,13)
-            # filtered_thisY=butter_lowpass_filter(fft_this_y,30,fs,4)
-        # elif (ch==1):   # channel 2 filter
-            # filtered_thisY=butter_bandstop_filter(this_y,fs,4,2,8)
-            
-        if (ch==1):     # channel 1 filter
-            filtered_thisY=butter_bandstop_filter(fft_this_y,fs,4,17,23)
-            # filtered_thisY=butter_lowpass_filter(this_y,26,fs,4)
-        self.filtcurves[ch].setData(fft_this_x,filtered_thisY)
+        this_fftX=frequencies[:fft_xlength]
+        this_fftX=abs(this_fftX)
         
-
-        # fft of filtered signal
+        this_fftY=np.fft.fft(this_fftY)
+        this_fftY=np.abs(this_fftY)/(fft_N)
         filtfft_y=np.fft.fft(filtered_thisY)
         filtfft_y=np.abs(filtfft_y)/(fft_N)
-        self.filtfftcurves[ch].setData(new_fftX,filtfft_y)
+        
+        
+        self.fftcurves[ch].setData(this_fftX,this_fftY)
+        self.filtfftcurves[ch].setData(this_fftX,filtfft_y)
         # global command
         # triggerVal=self.update_trigLine()
         # if (filtered_thisY[[xlength-1]]>triggerValA):
@@ -272,15 +274,15 @@ def main():
     def update():
         mintime = pylsl.local_clock() - plot_duration
         for ch,inlet in enumerate(inlets):
-            inlet.pull_and_plot(mintime, ch)
+            inlet.pull_and_filter(mintime, ch)
+            inlet.plot(ch)
 
             # if triggerLine.mouseClickEvent:
             #     inlet.update_trigLine(triggerVal)
 
     def update_fft():
-        fftmintime = pylsl.local_clock() - plot_duration
         for ch,inlet in enumerate(inlets):
-            inlet.plot_fft(ch,fftmintime)
+            inlet.plot_fft(ch)
         print("-----------FFT Update-----------")
 
     

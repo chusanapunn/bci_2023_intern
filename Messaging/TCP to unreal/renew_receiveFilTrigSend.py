@@ -128,6 +128,9 @@ class DataInlet(Inlet):
 
             elif (ch==2):     # channel 1 filter
                 filtered_thisY=butter_bandstop_filter(this_y,fs,4,28,34)
+            else:
+                filtered_thisY=this_y
+                
             try:
                 self.curves[ch].setData(this_x, this_y)
                 self.filtcurves[ch].setData(this_x,filtered_thisY)
@@ -245,7 +248,7 @@ def main():
         filtfftch=[None]*channel_count # filt FFT channel handler
 
     # override channelcount
-    channel_count=4
+    channel_count=3
 
     for ch in range(channel_count):
         # main channel

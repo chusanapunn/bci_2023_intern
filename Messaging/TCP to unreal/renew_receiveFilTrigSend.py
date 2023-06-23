@@ -56,6 +56,30 @@ class Inlet:
     def plot_fft(self,ch):
         pass
 
+class connectToUnreal:
+    def __init__(self):
+        self.connection=False
+        self.s_sender = socket.socket()         # Create a socket object
+        self.host = "127.0.0.1"              # Bind Local
+        self.port = 9030                # Reserve a port for your service.
+        self.s_sender.bind((self.host,self.port))
+
+        # Listen to incoming connection
+        self.s_sender.listen(5)
+    def startConnection(self):
+        # Connecting Prompt
+        try:
+            conn, addr =self.s_sender.accept()
+            print ('Open Listening Server', self.host, self.port)
+            self.connection=True
+            # Establish connection with client.
+            print('Got connection from', addr)
+        except self.s_sender.error :
+            self.connection=False
+            print("Connection DOOM, did you open the Client Yet?")
+        return self.connection
+        
+
 class DataInlet(Inlet):  
     def __init__(self,info:pylsl.StreamInfo,plt:pg.PlotItem,fftplt:pg.PlotItem,filtplt:pg.PlotItem,filtfftplt:pg.PlotItem):
         dtypes = [[], np.float32, np.float64, None, np.int32, np.int16, np.int8, np.int64]
@@ -289,8 +313,37 @@ def main():
     def update_fft():
         for ch,inlet in enumerate(inlets):
             inlet.plot_fft(ch)
+
     
+    def connectToUnreal(connected):
+        s_sender = socket.socket()         # Create a socket object
+        host = "127.0.0.1"              # Bind Local
+        port = 9030                # Reserve a port for your service.
+        connected=False
+        s_sender.bind((host,port))
+
+        # Listen to incoming connection
+        s_sender.listen(5)
+
+        # Connecting Prompt
+        try:
+            conn, addr =s_sender.accept()
+            print ('Open Listening Server', host, port)
+            connected=True
+            # Establish connection with client.
+            print('Got connection from', addr)
+        except s_sender.error :
+            connected=False
+            print("Connection DOOM, did you open the Client Yet?")
+        return connected
         
+
+    def sendCommand(cmd,c):
+        c.send(cmd.encode())
+        print("--Sent message--")
+        
+    
+
     
     # create a timer that will move the view every update_interval ms
     update_timer = QtCore.QTimer()
@@ -306,6 +359,16 @@ def main():
     fft_timer.timeout.connect(update_fft)
     fft_timer.start(fft_interval)
 
+    connection=connectToUnreal.startConnection()
+    print("Checck:"+ connection)
+
+    # while connected:
+    #     try:
+    #         time.sleep(1)
+    #         sendCommand(command,conn)
+    #     except ConnectionAbortedError:
+    #         print("Connection Doom` due to something wa")
+    #         connected = False
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         app = QtWidgets.QApplication(sys.argv) 

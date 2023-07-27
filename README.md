@@ -10,14 +10,33 @@ The Main Application created during the internship period, RFC is Recorder, Filt
     -rfc UI divides into 2 main panels, plot panel for signal monitoring which the current version display signal in a channel(raw + filtered)+channel()+... vertically for plot_duration interval
     
     ### Record Panel
-    -Start: start recording the signal.
-    -Stop: stop recording the signal, *** also stops the plot and update function - mostly to support the calculation process after finish the record session ***
-    -Reset: (kinda Deprecated) Should have reset the buffer and the variables value of the application to start new experiment. But for now, restart the application would be the most appropriate way.
-    -PlotRaw: Plot the recorded signal with mne plot, you can toggle the Inlet Source between General and Unicorn to divides the unit of measurement.
+    * Start: start recording the signal.
+    * Stop: stop recording the signal, *** also stops the plot and update function - mostly to support the calculation process after finish the record session ***
+    * Reset: (kinda Deprecated) Should have reset the buffer and the variables value of the application to start new experiment. But for now, restart the application would be the most appropriate way.
+    * PlotRaw: Plot the recorded signal with mne plot, you can toggle the Inlet Source between General and Unicorn to divides the unit of measurement.
+    * LogPanel: Display Overall Input datapoint amount, data array to be converted to raw data as raw data count, marker data count, buffer size, number of streaming channel, and fixation text of the events labels.
+    * SaveRaw: Save the record signal into filename according to the savefile name textbox on the same line.
+    * Browse: Browse saved record from your own devices and show the file to be loaded on the loadfile name textbox.
+    * UseLoadedRaw: Use recorded signal from the browsed file name.
+
+    ### Preprocessing Panel
+    * PlotSpectral: Plot Power Spectral Density of all signals comparing between filtered and non-filtered signal
+    * PlotEvents: Plot Signal with Events together.
+    * PlotEpochs: Plot Spectrogram and Z Score of spectogram from 2 types of epoch for comparison. This Button will requires Raw signal plot with events to generate Epochs. Which is using to generate x_train for data training.
+    * PlotPCA: Plot PCA Cluster and t-SNE cluster for all x_train data receive from PlotEpochs.
+
+    ### Feature Extraction Panel
+    * RadioButton, which have count = all streaming channel -1 (not using stimulus channel), = Currently selected channel to be used for feature extraction. *** note that feature extraction process is working on only one channel for each time, therefore, to feature extract from more than 1 channel, you have to modify the code furthermore.
+    * Filterbank: Using Butterworth Filter to filter signal into significant frequency band (Delta/alpha/beta...), the code will auto assign alpha and beta as new x_train data.
+    * DiscreteWavelets: Deprecate, as the dwt process downsampling the signal data, therefore, there is not enough data to use for training.
+    * HilbertTransform: Using Hilbert Transform to decompose the signal into IMFS signal. Default coding will assign the IMF-1 and IMF-2 as new x_train data similarly to Filterbank 2 band wave.
+
+    ### Classify Panel
+    * Classify LogReg : Classify the data using x_train and y_train, either from PlotEpochs, FilterBank, or HilbertTransform.
 
 
-
-    -InletSource: Deprecated. Using only General would be fine.
+    ### Inlet Source Panel
+    * Inlet Source: Deprecated. Suppose to switch the units for alternative inlet source. Using only General would be fine.
 
 
 * rfc_genFunction : general function file.

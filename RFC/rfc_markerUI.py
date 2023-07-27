@@ -8,14 +8,12 @@ import sys
 from win32api import GetSystemMetrics
 
 global focus,start,max_epoch,end,relax_interval,start_time,relax
-max_x = GetSystemMetrics(0)
-max_y = GetSystemMetrics(1)
-paint_timer = QtCore.QTimer()
-draw_timer = QtCore.QTimer()
-start_timer = QtCore.QTimer()
-relax_timer = QtCore.QTimer()
-epoch_timer = QtCore.QTimer()
-offset_timer = QtCore.QTimer()
+max_x = GetSystemMetrics(0)  # Get Screen Width
+max_y = GetSystemMetrics(1)  # Get Screen Height
+draw_timer = QtCore.QTimer()  # Timer for Circle drawing
+start_timer = QtCore.QTimer() # Count start Timer
+relax_timer = QtCore.QTimer() # Relax Interval timer (Default=Random)
+offset_timer = QtCore.QTimer() # Epoch Offset Timer (Default=+-0.5 s))
 draw_interval = 3000
 start_time = 5000
 relax_interval = 5000
@@ -64,21 +62,20 @@ class MarkerWindow(QtWidgets.QMainWindow):
     def drawFocus(self):
         global focus
         focus= True
-        
         self.update()
         draw_timer.timeout.connect(self.updateRelax)
         draw_timer.setSingleShot(True)
         draw_timer.start(draw_interval)
         self.backFocus
         
-    def frontFocus(self):
+    def frontFocus(self):  # Front Epoching offset
         global relax
         relax = False
         offset_timer.timeout.connect(self.drawFocus)
         offset_timer.setSingleShot(True)
         offset_timer.start(offset_time)
-    
-    def backFocus(self):
+     
+    def backFocus(self):   # Back Epoching offset
 
         offset_timer.timeout.connect(self.updateRelax)
         offset_timer.setSingleShot(True)
@@ -158,11 +155,5 @@ class MarkerWindow(QtWidgets.QMainWindow):
             qp.setPen(QPen(Qt.black,0.2,Qt.SolidLine))
             qp.drawText(max_x/2,max_y/2,"Experiment End")
             print("Experiment End")
-            
-        # else:
-        #     print("countdown: ", self.start_offset)
-        #     qp.setPen(QPen(Qt.black,0.2,Qt.SolidLine))
-        #     qp.drawText(max_x/2,max_y/2,"Prepare For Focus Experiment")
-        #     self.start_offset=self.start_offset+1
         
         qp.end()

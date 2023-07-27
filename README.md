@@ -2,7 +2,7 @@
 my internship period works on bci
 
 
-# RFC Folder (Record Filter Classifier)
+## RFC Folder (Record Filter Classifier)
  
 * rfc_main.py : main application file, Run the application from here.
 
@@ -17,3 +17,14 @@ my internship period works on bci
 * noisyecg (.mat/.csv) : 3 ecg signal with noise sample.
 
 * FocusC(-G)_raw (.fif) : Saved raw eeg signal file from recorded from experiment done on rfc. *** (note that it is not an appropriate standardize experiment) ***
+
+## Scratch Folder
+
+Day and topics that are scratchly written to figure out how some of the code works, may be there is some example useful here
+### Messaging Folder
+
+Scratchly written python of sending command acquiring from eeg signal threshold triggering to unreal engine 5 socket
+
+#### TCP to unreal Folder
+
+Scratchly written python of connecting TCP socket of python to unreal engine 5 using Unreal Engine TCP Socket plugin.

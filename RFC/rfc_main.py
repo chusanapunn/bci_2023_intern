@@ -18,12 +18,13 @@ import socket
 import time
 
 import rfc_markerUI as mui
-# import new_marker_pg as mkui
+
 from rfc_genFunction import *
 
 import sys
 import os as os   
 
+# Disable warning for classifier of whom can using GPU
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 plot_duration = 5 # how many seconds of data to show

@@ -2,8 +2,10 @@
 my internship period works on bci
 
 
-## RFC Folder (Recorder Filter Classifier)
+## RFC Folder
+The Main Application created during the internship period, RFC is Recorder, Filterer to Classifier for EEG lsl experiment function.
  More details inside the code comments
+
 * rfc_main.py : main application file, Run the application from here.
 
 * rfc_genFunction : general function file.

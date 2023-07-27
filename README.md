@@ -27,7 +27,7 @@ The Main Application created during the internship period, RFC is Recorder, Filt
     * PlotPCA: Plot PCA Cluster and t-SNE cluster for all x_train data receive from PlotEpochs.
 
     ### Feature Extraction Panel
-    * RadioButton, which have count = all streaming channel -1 (not using stimulus channel), = Currently selected channel to be used for feature extraction. *** note that feature extraction process is working on only one channel for each time, therefore, to feature extract from more than 1 channel, you have to modify the code furthermore.
+    * RadioButton, which have count = all streaming channel -1 (not using stimulus channel), = Currently selected channel to be used for feature extraction. *** note that feature extraction process is working on only one channel for each time, therefore, to feature extract from more than 1 channel, you have to modify the code furthermore. ***
     * Filterbank: Using Butterworth Filter to filter signal into significant frequency band (Delta/alpha/beta...), the code will auto assign alpha and beta as new x_train data.
     * DiscreteWavelets: Deprecate, as the dwt process downsampling the signal data, therefore, there is not enough data to use for training.
     * HilbertTransform: Using Hilbert Transform to decompose the signal into IMFS signal. Default coding will assign the IMF-1 and IMF-2 as new x_train data similarly to Filterbank 2 band wave.

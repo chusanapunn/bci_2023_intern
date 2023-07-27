@@ -17,9 +17,9 @@ import random
 import socket
 import time
 
-import rtfs_MarkerUI as mui
+import rfc_markerUI as mui
 # import new_marker_pg as mkui
-from rtfsCF import *
+from rfc_genFunction import *
 
 import sys
 import os as os   

@@ -2,7 +2,7 @@
 my internship period works on bci
 
 
-## RFC Folder (Record Filter Classifier)
+## RFC Folder (Recorder Filter Classifier)
  More details inside the code comments
 * rfc_main.py : main application file, Run the application from here.
 

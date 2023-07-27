@@ -18,7 +18,7 @@ In which we will use for epoching that are offset from the initiation of the cir
 
 * noisyecg (.mat/.csv) : 3 ecg signal with noise sample.
 
-* FocusC(-G)_raw (.fif) : Saved raw eeg signal file from recorded from Focus experiment done on rfc. 288 Epochs (144 Focus, 144 Non Focus, 0.25 s per epochs.)
+* FocusC(-G)_raw (.fif) : Saved raw eeg signal file from recorded from Focus experiment done on rfc. 288 Epochs (144 Focus, 144 Non Focus, 0.25 s per epochs. at 250 sampling rate)
  *** (note that it is not an appropriate standardize experiment) ***
 
 ## Scratch Folder

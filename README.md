@@ -1,5 +1,6 @@
 # bci_2023_intern
 my internship period works on bci during 1/6/23 to 27/7/23 at Mahidol BCI lab
+RFC application is created to support the research works on classifying attention state and non attention state. Which requires good signal measuring standard and good protocol to manipulate the data (shifting the epoch length, increase the epoch count, or rebalancing the epoch class amount).
 
 ## RFC Folder
 The Main Application created during the internship period, RFC is Recorder, Filterer to Classifier for EEG lsl experiment function.
@@ -7,7 +8,7 @@ The Main Application created during the internship period, RFC is Recorder, Filt
 
 * rfc_main.py : main application file, Run the application from here.
 
-    -rfc UI divides into 2 main panels, plot panel for signal monitoring which the current version display signal in a channel(raw + filtered)+channel()+... vertically for plot_duration interval
+    -rfc UI divides into 2 main panels, plot panel for signal monitoring which the current version display signal in a [channel(raw + filtered)+channel()+...+ StimulusChannel()] vertically for plot_duration interval
     
     ### Record Panel
     * Start: start recording the signal.
@@ -32,8 +33,9 @@ The Main Application created during the internship period, RFC is Recorder, Filt
     * HilbertTransform: Using Hilbert Transform to decompose the signal into IMFS signal. Default coding will assign the IMF-1 and IMF-2 as new x_train data similarly to Filterbank 2 band wave.
 
     ### Classify Panel
-    * Classify LogReg : Classify the data using x_train and y_train, either from PlotEpochs, FilterBank, or HilbertTransform.
-
+    * Classify LogReg: Classify the data using x_train and y_train, either from PlotEpochs, FilterBank, or HilbertTransform, by LogRegression method. Output accuracy, confusion matrix with some evaluation matrix.
+    * Classify SVM: Classify data using Support Vector Machine. Output accuracy, confusion matrix with some evaluation matrix.
+    * Classify DNN: Classify data using simple perceptrons neural networks dense layers to classify roughly. Output accuracy, confusion matrix with some evaluation matrix.
 
     ### Inlet Source Panel
     * Inlet Source: Deprecated. Suppose to switch the units for alternative inlet source. Using only General would be fine.

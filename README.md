@@ -7,6 +7,19 @@ The Main Application created during the internship period, RFC is Recorder, Filt
 
 * rfc_main.py : main application file, Run the application from here.
 
+    -rfc UI divides into 2 main panels, plot panel for signal monitoring which the current version display signal in a channel(raw + filtered)+channel()+... vertically for plot_duration interval
+    
+    ### Record Panel
+    -Start: start recording the signal.
+    -Stop: stop recording the signal, *** also stops the plot and update function - mostly to support the calculation process after finish the record session ***
+    -Reset: (kinda Deprecated) Should have reset the buffer and the variables value of the application to start new experiment. But for now, restart the application would be the most appropriate way.
+    -PlotRaw: Plot the recorded signal with mne plot, you can toggle the Inlet Source between General and Unicorn to divides the unit of measurement.
+
+
+
+    -InletSource: Deprecated. Using only General would be fine.
+
+
 * rfc_genFunction : general function file.
 
 * rfc_markerUI : Focus Experiment UI file, the ui that will appear when you start recording the experiment. The protocol of the marker is, randomly draw green circle on white fullscreen between the interval of 5-6, stay appearing for 3 seconds and disappear for another sequence of appearing. 

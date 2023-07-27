@@ -2,19 +2,13 @@ import pylsl
 import math as math
 import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtWidgets
 from typing import List
 import scipy.signal as sig
 import scipy.fftpack as fft
-import pandas as pd
 import mne
 import matplotlib.pyplot as plt
 import pywt as pywt
 
-import rtfs_MarkerUI as mui
-# import new_marker_pg as mkui
-
-import sys
 import os as os
 
 from sklearn.pipeline import make_pipeline
@@ -26,7 +20,7 @@ plot_duration = 5 # how many seconds of data to show
 update_interval = 20  # ms between screen updates
 pull_interval = 60 # ms between each pull operation
 fft_interval = 500 # ms between each FFT calculation and triggering
-global rawSignalArray,unicorn,unitz,triggerCode,marker_ui,channel_count,fftSignalArray,analyzeChannel,raw_info,epochs,raw,saveName,fn
+global rawSignalArray,channel_count,fftSignalArray,analyzeChannel,raw_info,epochs,raw,saveName,fn
 triggerCode=0
 markerSignalArray = []
 codearray=[]
@@ -39,10 +33,7 @@ loadraw=False
 unicorn = False
 unitz = 1000000
 channel_count=0
-analyzeChannel=0
 
-
-app=QtWidgets.QApplication(sys.argv)
 
 def display_confusionMatrix(clf):
     global y_train,epochs

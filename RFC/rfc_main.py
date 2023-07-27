@@ -3,8 +3,7 @@ import math as math
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtWidgets
-from PyQt5.QtGui import QPainter,QFont, QBrush
-from PyQt5.QtCore import Qt ,QPoint
+from PyQt5.QtGui import QFont
 from typing import List
 import scipy.signal as sig
 import scipy.fftpack as fft
@@ -17,12 +16,13 @@ import random
 import socket
 import time
 
-import rfc_markerUI as mui
+import rfc_markerUI as mui     # Focus Experiment UI
 
-from rfc_genFunction import *
+from rfc_genFunction import *  # General Function for application
 
 import sys
-import os as os   
+import os as os    
+import functools   # function call with fixed parameter for QTimer
 
 # Disable warning for classifier of whom can using GPU
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -31,8 +31,8 @@ plot_duration = 5 # how many seconds of data to show
 update_interval = 20  # ms between screen updates
 pull_interval = 60 # ms between each pull operation
 fft_interval = 500 # ms between each FFT calculation and triggering
-global rawSignalArray,unicorn,unitz,triggerCode,marker_ui,epochs,saveName
-triggerCode=0
+global rawSignalArray,unicorn,unitz,triggerCode,epochs
+triggerCode=0   
 markerSignalArray = []
 codearray=[]
 inputSignalCounter=0
@@ -44,8 +44,8 @@ signalDataCount=0
 unicorn = False 
 loadraw=False
 unitz = 1000000
-import functools
 
+# Initialize app
 app=QtWidgets.QApplication(sys.argv)
 
 def main():

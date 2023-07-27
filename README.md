@@ -1,6 +1,5 @@
 # bci_2023_intern
-my internship period works on bci
-
+my internship period works on bci during 1/6/23 to 27/7/23 at Mahidol BCI lab
 
 ## RFC Folder
 The Main Application created during the internship period, RFC is Recorder, Filterer to Classifier for EEG lsl experiment function.
